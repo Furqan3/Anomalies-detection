@@ -1,6 +1,6 @@
 "use client"
 import react from 'react'
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { collectData, analyzeData } from '../api/network/route';
 import dynamic from 'next/dynamic';
 
@@ -10,11 +10,15 @@ export default function NetworkAnalysis() {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState(null);
 
+  useEffect(() => { 
+    handleAnalysis();
+  }, []);
+
   const handleAnalysis = async () => {
     setLoading(true);
     try {
-      //const networkData = await collectData(60, 1);  // Collect data for 60 seconds with 1-second interval
-      const analysisResults = await analyzeData('isolation-forest');  // Or 'isolation-forest'
+      await collectData(300, 1);  // Collect data for 10 mins with 1-second interval
+      const analysisResults = await analyzeData('z-score');  // Or 'isolation-forest'
       setResults(analysisResults);
     } catch (error) {
       console.error('Error during analysis:', error);

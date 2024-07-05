@@ -19,6 +19,10 @@ def detect_anomalies(data, z_scores, threshold):
     return anomalies
 # Function to get process information by PID
 def get_process_info_by_pid(pid):
+    
+    if not isinstance(pid, int) or pid <= 0:
+        print(f"Invalid PID: {pid}")
+        return None
     try:
         proc = psutil.Process(pid)
         return {

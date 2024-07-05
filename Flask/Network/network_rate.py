@@ -1,13 +1,29 @@
 import json
+
 def calculate_network_rates():
     network_data = []
     timestamps = []
 
-    with open("network_data.json", 'r') as file:
-        for line in file:
-            data = json.loads(line)
-            timestamps.append(data["timestamp"])
-            network_data.append(data["network"])
+    try:
+        with open("new_network_data.json", 'r') as file:
+            for line in file:
+                try:
+                    data = json.loads(line.strip())  # Use strip to remove potential trailing whitespace
+                    timestamps.append(data["timestamp"])
+                    network_data.append(data["network"])
+                except json.JSONDecodeError:
+                    print(f"Skipping invalid JSON line: {line}")
+                    continue
+    except FileNotFoundError:
+        print("File not found. Ensure 'new_network_data.json' exists.")
+        return {}
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return {}
+    
+    if not network_data:
+        print("No valid network data available.")
+        return {}
     
     network_rates = {}
     for interface in network_data[0].keys():

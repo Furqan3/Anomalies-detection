@@ -42,7 +42,7 @@ def collect_data():
             "network": get_network_stats()
         }
         network_data.append(data)
-        with open("network_data.json", "a") as f:
+        with open("new_network_data.json", "a") as f:
             f.write(json.dumps(data) + "\n")
         time.sleep(interval)
 
@@ -52,7 +52,7 @@ def collect_data():
 def analyze():
     data = request.json
     method = data.get('method', 'z-score')
-    
+    print(data)
     
     
     network_rates = calculate_network_rates()
@@ -62,12 +62,12 @@ def analyze():
         interface_results = {}
         for rate_type in ['bytes_sent_rate', 'bytes_recv_rate', 'packets_sent_rate', 'packets_recv_rate']:
             if method == 'z-score':
-                print(method)
+                #print(method)
                 mean, std = calculate_mean_std(rates[rate_type])
                 z_scores = calculate_z_scores(np.array(rates[rate_type]), mean, std)
                 anomalies = detect_anomalies(rates[rate_type], z_scores, 3).tolist()
             else:  # isolation forest
-                print(method)
+                #print(method)
                 anomalies = isolation_forest_anomaly_detection(rates[rate_type])
             
             anomaly_info = []
