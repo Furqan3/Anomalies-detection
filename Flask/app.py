@@ -53,7 +53,7 @@ def analyze():
     data = request.json
     method = data.get('method', 'z-score')
     
-    print(method)
+    
     
     network_rates = calculate_network_rates()
     
@@ -62,15 +62,31 @@ def analyze():
         interface_results = {}
         for rate_type in ['bytes_sent_rate', 'bytes_recv_rate', 'packets_sent_rate', 'packets_recv_rate']:
             if method == 'z-score':
+                print(method)
                 mean, std = calculate_mean_std(rates[rate_type])
                 z_scores = calculate_z_scores(np.array(rates[rate_type]), mean, std)
                 anomalies = detect_anomalies(rates[rate_type], z_scores, 3).tolist()
             else:  # isolation forest
+                print(method)
                 anomalies = isolation_forest_anomaly_detection(rates[rate_type])
             
+            anomaly_info = []
+            
+            if len(anomalies) > 0:            
+                for idx in anomalies:
+                    # get process info
+                    rate_value = rates[rate_type][idx]
+                    process_info = get_process_info_by_pid(int(rate_value))  # Convert rate to int for PID
+                    anomaly_info.append({
+                        "index": idx,
+                        "rate_value": rate_value,
+                        "process_info": process_info
+                    })
+                                   
             interface_results[rate_type] = {
                 'data': rates[rate_type],
-                'anomalies': anomalies
+                'anomalies': anomaly_info,
+                
             }
         results[interface] = interface_results
     

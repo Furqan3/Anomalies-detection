@@ -25,15 +25,11 @@ def get_process_info_by_pid(pid):
             "pid": pid,
             "name": proc.name(),
             "username": proc.username(),
-            "status":proc.status(),
-            "started":proc.started()
+            
         }
     except psutil.NoSuchProcess:
-        print(f"Process with PID {pid} no longer exists.")
         return None
     except psutil.AccessDenied:
-        print(f"Access denied to process with PID {pid}.")
         return None
     except psutil.ZombieProcess:
-        print(f"Process with PID {pid} is a zombie process.")
         return None
