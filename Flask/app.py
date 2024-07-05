@@ -10,14 +10,13 @@ from Network.statistical_methods import calculate_mean_std
 from Network.statistical_methods import calculate_z_scores
 from Network.statistical_methods import detect_anomalies
 from Network.statistical_methods import get_process_info_by_pid
+from Network.network_rate import calculate_network_rates
 
 app = Flask(__name__)
 CORS(app)
 
-# ... (include your existing functions here: get_network_stats, calculate_mean_std, 
-#      calculate_z_scores, detect_anomalies, get_process_info_by_pid)
 
-def isolation_forest_anomaly_detection(data, contamination=0.1):
+def isolation_forest_anomaly_detection(data, contamination=0.05):
     X = np.array(data).reshape(-1, 1)
     clf = IsolationForest(contamination=contamination, random_state=42)
     clf.fit(X)
@@ -27,7 +26,7 @@ def isolation_forest_anomaly_detection(data, contamination=0.1):
 
 @app.route('/')
 def Home():
-    return "Hello World"
+    return "Anomaly Detection Homepage"
 
 @app.route('/collect_data', methods=['POST'])
 def collect_data():
@@ -43,6 +42,8 @@ def collect_data():
             "network": get_network_stats()
         }
         network_data.append(data)
+        with open("network_data.json", "a") as f:
+            f.write(json.dumps(data) + "\n")
         time.sleep(interval)
 
     return jsonify(network_data)
@@ -52,7 +53,9 @@ def analyze():
     data = request.json
     method = data.get('method', 'z-score')
     
-    network_rates = calculate_network_rates(data['network_data'])
+    print(method)
+    
+    network_rates = calculate_network_rates()
     
     results = {}
     for interface, rates in network_rates.items():
@@ -73,26 +76,7 @@ def analyze():
     
     return jsonify(results)
 
-def calculate_network_rates(network_data):
-    network_rates = {}
-    for interface in network_data[0]['network'].keys():
-        network_rates[interface] = {
-            "bytes_sent_rate": [],
-            "bytes_recv_rate": [],
-            "packets_sent_rate": [],
-            "packets_recv_rate": []
-        }
-        
-        prev_stats = network_data[0]['network'][interface]
-        for current_data in network_data[1:]:
-            current_stats = current_data['network'][interface]
-            network_rates[interface]["bytes_sent_rate"].append(current_stats["bytes_sent"] - prev_stats["bytes_sent"])
-            network_rates[interface]["bytes_recv_rate"].append(current_stats["bytes_recv"] - prev_stats["bytes_recv"])
-            network_rates[interface]["packets_sent_rate"].append(current_stats["packets_sent"] - prev_stats["packets_sent"])
-            network_rates[interface]["packets_recv_rate"].append(current_stats["packets_recv"] - prev_stats["packets_recv"])
-            prev_stats = current_stats
-    
-    return network_rates
+
 
 if __name__ == '__main__':
     app.run(debug=True)

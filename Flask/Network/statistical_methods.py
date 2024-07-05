@@ -24,7 +24,9 @@ def get_process_info_by_pid(pid):
         return {
             "pid": pid,
             "name": proc.name(),
-            "username": proc.username()
+            "username": proc.username(),
+            "status":proc.status(),
+            "started":proc.started()
         }
     except psutil.NoSuchProcess:
         print(f"Process with PID {pid} no longer exists.")

@@ -13,7 +13,7 @@ This repository contains a Flask server for anomalies detection.
 
 1. Create a virtual environment:
     ```
-    - python -m venv venv
+    python -m venv venv
     ```
 
 2. Activate the virtual environment:
