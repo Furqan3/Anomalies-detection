@@ -7,13 +7,14 @@ This repository contains a Flask server for anomalies detection.
 ### Prerequisites
 
 - Python 3.8
-- Virtual Environment (recommended)
+- Virtual Environment
 
 ### Installation
 
 1. Create a virtual environment:
 
-- python -m venv venv
+    - python -m venv venv
+      ```
 
 2. Activate the virtual environment:
 - Windows:
