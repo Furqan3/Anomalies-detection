@@ -1,8 +1,36 @@
-# Anomalies-detection
+# Anomalies Detection
 
-Setup Flask Server:
-1. Create Virtual Environment
-    a. python -m venv venv
-    b. venv\Scripts\activate
-2. Install Requirements
-    a. pip install -r requirements.txt
+This repository contains a Flask server for anomalies detection.
+
+## Setup
+
+### Prerequisites
+
+- Python 3.8
+- Virtual Environment (recommended)
+
+### Installation
+
+1. Create a virtual environment:
+
+- python -m venv venv
+
+2. Activate the virtual environment:
+- Windows:
+  ```
+  venv\Scripts\activate
+  ```
+
+
+3. Install the required packages:
+
+- pip install -r requirements.txt
+
+## Usage
+
+1. Start the Flask server:
+
+- python app.py or flask run
+
+2. The server will be running on `http://127.0.0.1:5000`.
+
