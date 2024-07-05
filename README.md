@@ -12,26 +12,27 @@ This repository contains a Flask server for anomalies detection.
 ### Installation
 
 1. Create a virtual environment:
-
+    ```
     - python -m venv venv
-      ```
+    ```
 
 2. Activate the virtual environment:
-- Windows:
-  ```
-  venv\Scripts\activate
-  ```
-
+    ```
+    venv\Scripts\activate
+    ```
 
 3. Install the required packages:
-
-- pip install -r requirements.txt
+    ```
+    pip install -r requirements.txt
+    ```
 
 ## Usage
 
 1. Start the Flask server:
+    ```
+    python app.py
+    ```
 
-- python app.py or flask run
 
 2. The server will be running on `http://127.0.0.1:5000`.
 
