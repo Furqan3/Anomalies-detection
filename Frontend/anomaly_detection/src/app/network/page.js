@@ -1,8 +1,9 @@
 "use client"
-import react from 'react'
-import { useState, useEffect } from 'react';
+import react from 'react';
+import { useState } from 'react';
 import { collectData, analyzeData } from '../api/network/route';
 import dynamic from 'next/dynamic';
+
 
 const Plot = dynamic(() => import('react-plotly.js'), { ssr: false });
 
@@ -10,14 +11,10 @@ export default function NetworkAnalysis() {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState(null);
 
-  useEffect(() => { 
-    handleAnalysis();
-  }, []);
-
   const handleAnalysis = async () => {
     setLoading(true);
     try {
-      await collectData(300, 1);  // Collect data for 10 mins with 1-second interval
+      //const networkData = await collectData(60, 1);  // Collect data for 60 seconds with 1-second interval
       const analysisResults = await analyzeData('z-score');  // Or 'isolation-forest'
       setResults(analysisResults);
     } catch (error) {
@@ -56,12 +53,21 @@ export default function NetworkAnalysis() {
           {data.anomalies.map((anomaly, index) => (
             <li key={index}>
               Index: {anomaly.index}, Rate: {anomaly.rate_value}
-              {anomaly.process_info && (
+              <h4>Process Information:</h4>
+              {anomaly.process_info.length > 0 ? (
                 <ul>
-                  <li>PID: {anomaly.process_info.pid}</li>
-                  <li>Name: {anomaly.process_info.name}</li>
-                  <li>Username: {anomaly.process_info.username}</li>
+                  {anomaly.process_info.map((proc, pIndex) => (
+                    <li key={pIndex}>
+                      <strong>PID:</strong> {proc.pid}<br />
+                      <strong>Name:</strong> {proc.name}<br />
+                      <strong>Username:</strong> {proc.username}<br />
+                      <strong>Executable:</strong> {proc.exe}<br />
+                      <strong>Status:</strong> {proc.status}
+                    </li>
+                  ))}
                 </ul>
+              ) : (
+                <p>No relevant process information found for this anomaly.</p>
               )}
             </li>
           ))}

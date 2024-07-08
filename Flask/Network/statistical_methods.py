@@ -29,6 +29,8 @@ def get_process_info_by_pid(pid):
             "pid": pid,
             "name": proc.name(),
             "username": proc.username(),
+            "exe": proc.exe(),
+            "status": proc.status()
             
         }
     except psutil.NoSuchProcess:
