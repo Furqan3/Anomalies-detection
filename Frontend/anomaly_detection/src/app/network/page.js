@@ -5,6 +5,8 @@ import { collectData, analyzeData } from '../api/network/route';
 import dynamic from 'next/dynamic';
 
 
+
+
 const Plot = dynamic(() => import('react-plotly.js'), { ssr: false });
 
 export default function NetworkAnalysis() {
@@ -15,7 +17,7 @@ export default function NetworkAnalysis() {
     setLoading(true);
     try {
       //const networkData = await collectData(60, 1);  // Collect data for 60 seconds with 1-second interval
-      const analysisResults = await analyzeData('z-score');  // Or 'isolation-forest'
+      const analysisResults = await analyzeData();
       setResults(analysisResults);
     } catch (error) {
       console.error('Error during analysis:', error);
@@ -23,12 +25,13 @@ export default function NetworkAnalysis() {
     setLoading(false);
   };
 
-  const renderPlot = (interfaceName, rateType) => {
-    if (!results || !results[interfaceName]) return null;
+  const renderPlot = (method, interfaceName, rateType) => {
+    if (!results || !results[method] || !results[method][interfaceName]) return null;
 
-    const data = results[interfaceName][rateType];
+    const data = results[method][interfaceName][rateType];
     return (
       <div>
+        <h3>{method.toUpperCase()} - {interfaceName} - {rateType}</h3>
         <Plot
           data={[
             {
@@ -46,14 +49,14 @@ export default function NetworkAnalysis() {
               marker: { color: 'red', size: 10 },
             },
           ]}
-          layout={{ title: `${interfaceName} - ${rateType}`, width: 600, height: 400 }}
+          layout={{ width: 600, height: 400 }}
         />
-        <h3>Anomalies:</h3>
+        <h4>Anomalies:</h4>
         <ul>
           {data.anomalies.map((anomaly, index) => (
             <li key={index}>
               Index: {anomaly.index}, Rate: {anomaly.rate_value}
-              <h4>Process Information:</h4>
+              <h5>Process Information:</h5>
               {anomaly.process_info.length > 0 ? (
                 <ul>
                   {anomaly.process_info.map((proc, pIndex) => (
@@ -61,7 +64,7 @@ export default function NetworkAnalysis() {
                       <strong>PID:</strong> {proc.pid}<br />
                       <strong>Name:</strong> {proc.name}<br />
                       <strong>Username:</strong> {proc.username}<br />
-                      <strong>Executable:</strong> {proc.exe}<br />
+                      {/* <strong>Executable:</strong> {proc.exe}<br /> */}
                       <strong>Status:</strong> {proc.status}
                     </li>
                   ))}
@@ -82,13 +85,17 @@ export default function NetworkAnalysis() {
       <button onClick={handleAnalysis} disabled={loading}>
         {loading ? 'Analyzing...' : 'Start Analysis'}
       </button>
-      {results && Object.keys(results).map(interfaceName => (
+      {results && Object.keys(results['z-score']).map(interfaceName => (
         <div key={interfaceName}>
           <h2>{interfaceName}</h2>
-          {renderPlot(interfaceName, 'bytes_sent_rate')}
-          {renderPlot(interfaceName, 'bytes_recv_rate')}
-          {renderPlot(interfaceName, 'packets_sent_rate')}
-          {renderPlot(interfaceName, 'packets_recv_rate')}
+          <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+            {['bytes_sent_rate', 'bytes_recv_rate', 'packets_sent_rate', 'packets_recv_rate'].map(rateType => (
+              <div key={rateType} style={{ display: 'flex' }}>
+                {renderPlot('z-score', interfaceName, rateType)}
+                {renderPlot('isolation-forest', interfaceName, rateType)}
+              </div>
+            ))}
+          </div>
         </div>
       ))}
     </div>

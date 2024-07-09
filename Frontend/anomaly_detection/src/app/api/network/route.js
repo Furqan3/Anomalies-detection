@@ -7,7 +7,11 @@ export const collectData = async (duration, interval) => {
   return response.data;
 };
 
-export const analyzeData = async (method) => {
-  const response = await axios.post(`${API_URL}/analyze`, { method });
+// export const analyzeData = async (method) => {
+//   const response = await axios.post(`${API_URL}/analyze`, { method });
+//   return response.data;
+// };
+export const analyzeData = async () => {
+  const response = await axios.get(`${API_URL}/analyze`);
   return response.data;
 };

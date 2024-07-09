@@ -58,54 +58,67 @@ def collect_data():
 
     #return jsonify(network_data)
 
-@app.route('/analyze', methods=['POST'])
+@app.route('/analyze', methods=['GET'])
 def analyze():
-    data = request.json
-    method = data.get('method', 'z-score')
-    print(data)
+    # data = request.json
+    # method = data.get('method', 'z-score')
+    # print(data)
     
     #collect_data()
     #network_rates = calculate_network_rates()
     network_rates, connection_details = calculate_network_rates_and_connections()
+    results = {
+        'z-score': {},
+        'isolation-forest': {}
+    }
     
-    results = {}
-    for interface, rates in network_rates.items():
-        interface_results = {}
-        for rate_type in ['bytes_sent_rate', 'bytes_recv_rate', 'packets_sent_rate', 'packets_recv_rate']:
-            if method == 'z-score':
-                #print(method)
-                mean, std = calculate_mean_std(rates[rate_type])
-                z_scores = calculate_z_scores(np.array(rates[rate_type]), mean, std)
-                anomalies = detect_anomalies(rates[rate_type], z_scores, 3).tolist()
-            else:  # isolation forest
-                #print(method)
-                anomalies = isolation_forest_anomaly_detection(rates[rate_type])
-            
-            anomaly_info = []
-            
-            if len(anomalies) > 0:            
-                for idx in anomalies:
-                    rate_value = rates[rate_type][idx]
-                    relevant_connections = connection_details[idx]
-                    # Filter connections and get process info
-                    process_info = []
-                    for conn in relevant_connections:
-                        if conn['status'] == 'ESTABLISHED' or conn['pid'] != 0:
-                            proc_info = get_process_info_by_pid(conn['pid'])
-                            if proc_info and (proc_info not in process_info):
-                                process_info.append(proc_info)
-                    anomaly_info.append({
-                        "index": idx,
-                        "rate_value": rate_value,
-                        "process_info": process_info
-                    })
-                                   
-            interface_results[rate_type] = {
-                'data': rates[rate_type],
-                'anomalies': anomaly_info,
+    for method in ['z-score', 'isolation-forest']:
+        for interface, rates in network_rates.items():
+            interface_results = {}
+            for rate_type in ['bytes_sent_rate', 'bytes_recv_rate', 'packets_sent_rate', 'packets_recv_rate']:
+                if method == 'z-score':
+                    #print(method)
+                    mean, std = calculate_mean_std(rates[rate_type])
+                    z_scores = calculate_z_scores(np.array(rates[rate_type]), mean, std)
+                    anomalies = detect_anomalies(rates[rate_type], z_scores, 3).tolist()
+                else:  # isolation forest
+                    #print(method)
+                    anomalies = isolation_forest_anomaly_detection(rates[rate_type])
                 
-            }
-        results[interface] = interface_results
+                anomaly_info = []
+                # use a set to track seen PIDs
+                seen_pids = set()
+                if len(anomalies) > 0:            
+                    for idx in anomalies:
+                        rate_value = rates[rate_type][idx]
+                        relevant_connections = connection_details[idx]
+                        # Filter connections and get process info
+                        process_info = []
+                        
+                        for conn in relevant_connections:
+                            if conn['status'] == 'ESTABLISHED' or conn['pid'] != 0:
+                                pid = conn['pid']
+                                if pid not in seen_pids:
+                                    proc_info = get_process_info_by_pid(pid)
+                                    if proc_info:
+                                        process_info.append(proc_info)
+                                        seen_pids.add(pid)
+                        
+                        anomaly_info.append({
+                            "index": idx,
+                            "rate_value": rate_value,
+                            "process_info": process_info
+                        })
+                        
+                #print(seen_pids)    
+                                    
+                interface_results[rate_type] = {
+                    'data': rates[rate_type],
+                    'anomalies': anomaly_info,
+                
+                    
+                }
+            results[method][interface] = interface_results
     
     return jsonify(results)
 
