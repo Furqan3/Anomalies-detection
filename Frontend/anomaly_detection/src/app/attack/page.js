@@ -1,6 +1,6 @@
 "use client"
 import React, { useState } from 'react';
-import { analyzeData } from '../api/network/route';
+import { DetectAttack } from '../api/network/route';
 import dynamic from 'next/dynamic';
 
 const Plot = dynamic(() => import('react-plotly.js'), { ssr: false });
@@ -12,7 +12,7 @@ export default function NetworkAnalysis() {
   const handleAnalysis = async () => {
     setLoading(true);
     try {
-      const analysisResults = await analyzeData();
+      const analysisResults = await DetectAttack();
       setResults(analysisResults);
     } catch (error) {
       console.error('Error during analysis:', error);
