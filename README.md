@@ -36,3 +36,4 @@ This repository contains a Flask server for anomalies detection.
 
 2. The server will be running on `http://127.0.0.1:5000`.
 
+
