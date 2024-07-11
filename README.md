@@ -36,4 +36,10 @@ This repository contains a Flask server for anomalies detection.
 
 2. The server will be running on `http://127.0.0.1:5000`.
 
+## ScreenShots
 
+1. Comparison of Z-Score and Isolation Forest
+![alt text](image.png)
+
+2. Detect Attack Type
+![alt text](image-1.png)
