@@ -12,6 +12,6 @@ export const collectData = async (duration, interval) => {
 //   return response.data;
 // };
 export const analyzeData = async () => {
-  const response = await axios.get(`${API_URL}/analyze`);
+  const response = await axios.get(`${API_URL}/detect`);
   return response.data;
 };

@@ -19,6 +19,9 @@ from Network.network_rate import calculate_network_rates
 from Network.network_rate import calculate_network_rates_and_packets
 from Network.network_rate import calculate_network_rates_and_connections
 
+
+from Network.detect_attack import correlate_events
+
 app = Flask(__name__)
 CORS(app)
 
@@ -35,7 +38,7 @@ def isolation_forest_anomaly_detection(data, contamination=0.05):
 def Home():
     return "Anomaly Detection Homepage"
 
-#@app.route('/collect_data', methods=['POST'])
+@app.route('/collect_data', methods=['POST'])
 def collect_data():
     duration = request.json.get('duration', 300)  # Default to 5 min
     interval = request.json.get('interval', 1)   # Default to 1 second
@@ -122,6 +125,24 @@ def analyze():
     
     return jsonify(results)
 
+
+
+#detect attack type
+@app.route('/detect', methods=['GET'])
+def detect():
+    #enhanced_data = collect_enhanced_data()
+    network_rates, connection_details = calculate_network_rates_and_connections()
+    
+    potential_attacks = correlate_events(network_rates, connection_details[-1])
+    
+    
+    results = {
+        'potential_attacks': potential_attacks,
+        'network_rates': network_rates,
+        'connection_details': connection_details[-1]
+    }
+    
+    return jsonify(results)
 
 
 if __name__ == '__main__':

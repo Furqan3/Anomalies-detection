@@ -89,3 +89,29 @@ def get_network_stats_with_connections():
     network_stats["connection_details"] = connection_details
     
     return network_stats
+
+
+
+#Enhanced Data collection
+def collect_enhanced_data(duration=300, interval=1):
+    start_time = time.time()
+    enhanced_data = []
+    while time.time() - start_time < duration:
+        network_stats = get_network_stats_with_connections()
+        system_stats = get_system_stats()
+        enhanced_data.append({
+            "timestamp": time.time(),
+            "network": network_stats,
+            "system": system_stats
+        })
+        time.sleep(interval)
+    return enhanced_data
+
+def get_system_stats():
+    return {
+        "cpu_percent": psutil.cpu_percent(),
+        "memory_percent": psutil.virtual_memory().percent,
+        "disk_io": psutil.disk_io_counters(),
+        "open_files": len(psutil.Process().open_files()),
+        "connections": len(psutil.net_connections())
+    }
