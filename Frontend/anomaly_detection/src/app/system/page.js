@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import './SystemAnalysis.css';
 import { get_data } from '../api/system/route';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
@@ -47,6 +47,10 @@ function getAnomalies(apiResponse) {
   }
 }
 
+function calculateAverage(cpuData, ramData) {
+  return cpuData.map((cpu, index) => (cpu + ramData[index]) / 2);
+}
+
 export default function SystemAnalysis() {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState(null);
@@ -69,46 +73,45 @@ export default function SystemAnalysis() {
     setLoading(false);
   };
 
-  const renderChart = (data, dataKey, anomalies, anomalyKey, color) => {
-  let anomalyData = [];
-  
-  if (anomalies && anomalies[anomalyKey]) {
-    const anomalyIndices = anomalies[anomalyKey];
-    anomalyData = anomalyIndices.map(index => ({
-      x: index,
-      y: data[index]
-  
-    }));
-  } else {
-    console.warn(`No anomalies found for key: ${anomalyKey}`);
-  }
+  const renderChart = (data, dataKey, anomalies, anomalyKey, color, avgData = null) => {
+    let anomalyData = [];
+    
+    if (anomalies && anomalies[anomalyKey]) {
+      const anomalyIndices = anomalies[anomalyKey];
+      anomalyData = anomalyIndices.map(index => ({
+        x: index,
+        y: avgData ? avgData[index] : data[index]
+      }));
+    } else {
+      console.warn(`No anomalies found for key: ${anomalyKey}`);
+    }
 
-  const chartData = {
-    labels: data.map((_, index) => index),
-    datasets: [
-      {
-        label: dataKey === 'cpu' ? 'CPU Usage' : 'RAM Usage',
-        data: data,
-        borderColor: color,
-        backgroundColor: color,
-        borderWidth: 1,
-        pointRadius: 0,
-        pointHoverRadius: 0,
-      },
-      {
-        label: 'Anomalies',
-        data: anomalyData,
-        borderColor: 'red',
-        backgroundColor: 'rgba(255, 0, 0, 0.5)',
-        pointRadius: 2,
-        pointHoverRadius: 4,
-        borderWidth: 1,
-        showLine: false,
-        pointStyle: 'circle',
-      }
-    ],
-  };
-  
+    const chartData = {
+      labels: data.map((_, index) => index),
+      datasets: [
+        {
+          label: avgData ? 'Average CPU & RAM Usage' : (dataKey === 'cpu' ? 'CPU Usage' : 'RAM Usage'),
+          data: avgData || data,
+          borderColor: color,
+          backgroundColor: color,
+          borderWidth: 1,
+          pointRadius: 0,
+          pointHoverRadius: 0,
+        },
+        {
+          label: 'Anomalies',
+          data: anomalyData,
+          borderColor: 'red',
+          backgroundColor: 'rgba(255, 0, 0, 0.5)',
+          pointRadius: 2,
+          pointHoverRadius: 4,
+          borderWidth: 1,
+          showLine: false,
+          pointStyle: 'circle',
+        }
+      ],
+    };
+    
     const options = {
       responsive: true,
       plugins: {
@@ -117,7 +120,7 @@ export default function SystemAnalysis() {
         },
         title: {
           display: true,
-          text: `${dataKey.toUpperCase()} Usage with Anomalies`,
+          text: avgData ? `Average ${dataKey.toUpperCase()} Usage with Anomalies` : `${dataKey.toUpperCase()} Usage with Anomalies`,
         },
         tooltip: {
           callbacks: {
@@ -125,7 +128,7 @@ export default function SystemAnalysis() {
               const datasetLabel = context.dataset.label || '';
               const value = context.parsed.y;
               const index = context.parsed.x;
-              return `${datasetLabel}: ${value} (Index: ${index})`;
+              return `${datasetLabel}: ${value.toFixed(2)} (Index: ${index})`;
             }
           }
         }
@@ -141,10 +144,9 @@ export default function SystemAnalysis() {
         },
       },
     };
-  
+    
     return <Line data={chartData} options={options} />;
   };
-
 
   return (
     <div>
@@ -171,12 +173,26 @@ export default function SystemAnalysis() {
             {renderChart(results.ramData, 'ram', results.anomalies || {}, 'isolation_forest_anomalies_ram', '#82ca9d')}
           </div>
           <div>
-            <h3>CPU & RAM Usage with Multivariate Isolation Forest Anomalies</h3>
-            {renderChart(results.cpuData, 'cpu', results.anomalies || {}, 'multivariate_isolation_forest_anomalies', '#8884d8')}
+            <h3>Average CPU & RAM Usage with Multivariate Isolation Forest Anomalies</h3>
+            {renderChart(
+              calculateAverage(results.cpuData, results.ramData),
+              'avg',
+              results.anomalies || {},
+              'multivariate_isolation_forest_anomalies',
+              '#8884d8',
+              calculateAverage(results.cpuData, results.ramData)
+            )}
           </div>
           <div>
-            <h3>CPU & RAM Usage with Multivariate Z-Score Anomalies</h3>
-            {renderChart(results.ramData, 'ram', results.anomalies || {}, 'multivariate_zscore_anomalies', '#82ca9d')}
+            <h3>Average CPU & RAM Usage with Multivariate Z-Score Anomalies</h3>
+            {renderChart(
+              calculateAverage(results.cpuData, results.ramData),
+              'avg',
+              results.anomalies || {},
+              'multivariate_zscore_anomalies',
+              '#82ca9d',
+              calculateAverage(results.cpuData, results.ramData)
+            )}
           </div>
         </div>
       )}
