@@ -1,7 +1,7 @@
 # db.py
 import pymongo
 from datetime import datetime, timedelta
-from System.retrieve_system_data import get_system_data
+from retrieve_system_data import get_system_data
 import time
 class mydatabase:
     def __init__(self):
