@@ -1,86 +1,33 @@
-Sure, here is the GitHub README in Markdown format:
 
-```markdown
-# System Anomaly Detection Project
+# System Anomaly Detection
 
-## Introduction
+This project implements a system anomaly detection system using Python, MongoDB, FastAPI, and React.
 
-This project involves detecting anomalies in system performance data collected from a personal computer at 3-second intervals. The aim is to identify unusual patterns that could indicate potential issues in CPU and RAM usage.
+## Project Structure
 
-## Data Collection
+- **db.py**: Defines a MongoDB database class (`mydatabase`) for storing system data.
+- **detection.py**: Contains functions for anomaly detection using Z-score and Isolation Forest algorithms.
+- **retrieve_system_data.py**: Retrieves system data including RAM and CPU usage, and process information using psutil.
+- **app.py**: FastAPI server setup to expose API endpoints for retrieving system data and anomalies.
+- **SystemAnalysis.jsx**: React component for visualizing system data and anomalies using Chart.js.
+- **api/system/route.js**: Axios configuration for making API requests to the FastAPI server.
 
-Data was extracted at 3-second intervals, including:
-- CPU percentage usage
-- RAM percentage usage
-- All processes data
+## Setup
 
-## Anomaly Detection Techniques
-
-The following techniques were used to detect anomalies:
-- **Z-score**: Identifies outliers by measuring the number of standard deviations a data point is from the mean.
-- **Isolation Forest**: Isolates observations by randomly selecting a feature and then a split value between the maximum and minimum values of the selected feature.
-- **Local Outlier Factor (LOF)**: Measures the local density deviation of a given data point with respect to its neighbors.
-
-These techniques were applied to both individual CPU and RAM usage data as well as their cumulative usage.
-
-## Data Storage
-
-Processed data, including identified anomalies, was stored in MongoDB for efficient retrieval and management.
-
-## API Development
-
-Two APIs were developed for data retrieval:
-- **Flask API**: Initially used for creating endpoints for data retrieval from MongoDB.
-- **FastAPI**: Later used for improved performance and data retrieval from MongoDB.
-
-## Frontend Development
-
-The frontend was developed using Next.js, providing a seamless user experience with server-side rendering. The UI displays charts and visualizations of CPU and RAM usage, with anomalies clearly marked.
-
-## System Diagram
-
-![System Diagram](link_to_diagram)
+1. **Install Dependencies**: Ensure Python dependencies are installed using `pip install -r requirements.txt`.
+2. **Run MongoDB**: Start MongoDB server locally.
+3. **Start FastAPI Server**: Run `uvicorn app:app --reload` to start the FastAPI server.
+4. **Start React App**: Launch the React frontend with `npm start` or `yarn start`.
 
 ## Usage
 
-1. **Clone the repository**:
-   ```sh
-   git clone https://github.com/yourusername/system-anomaly-detection.git
-   cd system-anomaly-detection
-   ```
+1. Access the frontend at `http://localhost:3000`.
+2. Click on "Start Analysis" to fetch and analyze system data.
+3. Charts display CPU and RAM usage with identified anomalies highlighted.
 
-2. **Install dependencies**:
-   ```sh
-   pip install -r requirements.txt
-   npm install
-   ```
+## Technologies Used
 
-3. **Run the APIs**:
-   - For Flask API:
-     ```sh
-     python app_flask.py
-     ```
-   - For FastAPI:
-     ```sh
-     uvicorn app_fastapi:app --reload
-     ```
+- **Backend**: Python, FastAPI, MongoDB
+- **Frontend**: React, Chart.js
+- **Data Analysis**: NumPy, SciPy, scikit-learn
 
-4. **Run the Next.js frontend**:
-   ```sh
-   npm run dev
-   ```
-
-## Conclusion
-
-This project provided valuable experience in working with APIs, data visualization, and integrating data-driven web applications using modern web technologies like Next.js. The anomaly detection techniques and efficient data retrieval methods implemented here can be applied to various system monitoring and performance optimization tasks.
-
-## License
-
-This project is licensed under the MIT License.
-
----
-
-Feel free to contribute, raise issues, and suggest improvements. For more details, visit the [GitHub repository](https://github.com/yourusername/system-anomaly-detection).
-```
-
-Replace `yourusername` with your actual GitHub username and `link_to_diagram` with the actual link to your system diagram image if available.
